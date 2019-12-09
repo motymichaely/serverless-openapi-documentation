@@ -1,6 +1,6 @@
 {
-  "name": "serverless-openapi-documentation",
-  "version": "0.4.5",
+  "name": "serverless-openapi-documentation-v2",
+  "version": "0.4.6",
   "description": "Serverless 1.0 plugin to generate OpenAPI V3 documentation from serverless configuration",
   "main": "dist/index.js",
   "repository": {
@@ -24,13 +24,13 @@
     "test:build": "jest -c '{}' build",
     "test:coverage": "jest --coverage",
     "lint": "tslint -p tsconfig.json --type-check -c tslint.json",
-    "preversion": "yarn lint && yarn build && yarn test:build && changelog-verify CHANGELOG.md",
+    "preversion": "npm run lint && npm run build && npm run test:build && changelog-verify CHANGELOG.md",
     "version": "version-changelog CHANGELOG.md && changelog-verify CHANGELOG.md && git add CHANGELOG.md",
     "release": "cd build && npm publish",
-    "test:project": "cd test/project && yarn sls openapi generate",
+    "test:project": "cd test/project && npm run sls openapi generate",
     "test:prepare": "scripts/prepareTests.bash",
-    "build:link": "yarn build && cd build && yarn link",
-    "build:watch": "yarn build && tsc --watch",
+    "build:link": "npm run build && cd build && npm run link",
+    "build:watch": "npm run build && tsc --watch",
     "build": "scripts/build.bash",
     "prepare": "npm run build"
   },
