@@ -1,6 +1,7 @@
-**/__tests__/**
-.*
-tslint.json
+src
+test
+node_modules
 tsconfig.json
 jest.config.js
-yarn.lock
+package-lock.json
+.history

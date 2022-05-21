@@ -1,15 +1,19 @@
 {
-  "name": "serverless-openapi-documentation-v2",
+  "name": "@apalchys/serverless-openapi-documentation",
   "version": "0.4.6",
-  "description": "Serverless 1.0 plugin to generate OpenAPI V3 documentation from serverless configuration",
+  "description": "Serverless 2.0 plugin to generate OpenAPI V3 documentation from serverless configuration",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/usamedin/serverless-openapi-documentation"
+    "url": "https://github.com/apalchys/serverless-openapi-documentation"
   },
-  "bugs": "https://github.com/usamedin/serverless-openapi-documentation/issues",
-  "author": "Abilio Henrique <abilio.henrique@temando.com>",
+  "files": [
+    "dist"
+  ],
+  "bugs": "https://github.com/apalchys/serverless-openapi-documentation/issues",
+  "author": "Andrei Palchys <andrei@palchys.com>",
   "contributors": [
+    "Andrei Palchys <andrei@palchys.com>",
     "Abilio Henrique <abilio.henrique@temando.com>",
     "nfour <novus.nfour@gmail.com>"
   ],
@@ -21,45 +25,45 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "test:build": "jest -c '{}' build",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p tsconfig.json --type-check -c tslint.json",
-    "preversion": "npm run lint && npm run build && npm run test:build && changelog-verify CHANGELOG.md",
+    "preversion": "npm run build && changelog-verify CHANGELOG.md",
     "version": "version-changelog CHANGELOG.md && changelog-verify CHANGELOG.md && git add CHANGELOG.md",
     "release": "cd build && npm publish",
     "test:project": "cd test/project && npm run sls openapi generate",
     "test:prepare": "scripts/prepareTests.bash",
     "build:link": "npm run build && cd build && npm run link",
     "build:watch": "npm run build && tsc --watch",
-    "build": "scripts/build.bash",
+    "build": "tsc",
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.5.8",
-    "@types/chalk": "^0.4.31",
-    "@types/fs-extra": "^4.0.0",
-    "@types/jest": "^20.0.2",
-    "@types/js-yaml": "^3.5.31",
-    "@types/node": "^8.0.7",
-    "@types/uuid": "^3.0.0",
-    "changelog-verify": "^1.0.4",
-    "jest": "^24.5.0",
-    "serverless": "^1.38.0",
-    "ts-jest": "^24.0.0",
-    "ts-node": "^3.1.0",
-    "tslint": "^5.4.3",
-    "tslint-config-temando": "^1.1.4",
-    "typescript": "^3.3.3333",
-    "version-changelog": "^2.1.0"
+    "@types/jest": "^27.5.1",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^14",
+    "@types/serverless": "^3.12.5",
+    "@types/uuid": "^8.3.4",
+    "changelog-verify": "^1.1.2",
+    "esbuild": "0.14.39",
+    "jest": "^28.1.0",
+    "serverless": "^2.72.3",
+    "ts-jest": "^28.0.2",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.6.4",
+    "version-changelog": "^3.1.1"
   },
   "dependencies": {
     "@jdw/jst": "^2.0.0-beta.15",
-    "bluebird": "^3.5.0",
-    "chalk": "^1.1.3",
-    "fs-extra": "^4.0.1",
-    "js-yaml": "^3.8.4",
+    "chalk": "^4.1.2",
+    "js-yaml": "^4.1.0",
     "lutils": "^2.4.0",
-    "swagger2openapi": "^2.5.0",
-    "uuid": "^3.1.0"
+    "typescript-json-schema": "^0.53.1",
+    "uuid": "^8.3.2"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true
   }
 }

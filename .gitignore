@@ -1,7 +1,11 @@
 node_modules
+dist/**/*
 /npm-*
 /build
 .coverage
 .directory
 .DS_STORE*
 *.log
+.history
+.vscode
+dist/**/*

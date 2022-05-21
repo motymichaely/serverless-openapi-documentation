@@ -1,8 +1,19 @@
 import { dereference } from '@jdw/jst';
-// tslint:disable-next-line no-submodule-imports
-import { validateSync as openApiValidatorSync } from 'swagger2openapi/validate';
+import { resolve } from 'path';
+import { NamedHttpApiEventAuthorizer } from 'serverless/aws';
+import * as TJS from 'typescript-json-schema';
 import * as uuid from 'uuid';
-import { IDefinition, IDefinitionConfig, IOperation, IParameterConfig, IServerlessFunctionConfig } from './types';
+import {
+  IDefinition,
+  IDefinitionConfig,
+  IEventDocumentation,
+  IModel,
+  IOperation,
+  IParameterConfig,
+  IServerlessFunctionConfig,
+  IServerlessFunctionEvent,
+  OperationConfig,
+} from './types';
 import { clone, isIterable, merge } from './utils';
 
 export class DefinitionGenerator {
@@ -10,7 +21,7 @@ export class DefinitionGenerator {
   public version = '3.0.0';
 
   // Base configuration object
-  public definition = <IDefinition> {
+  public definition = <IDefinition>{
     openapi: this.version,
     components: {},
   };
@@ -19,21 +30,14 @@ export class DefinitionGenerator {
 
   /**
    * Constructor
-   * @param serviceDescriptor IServiceDescription
+   * @param config IDefinitionConfig
    */
-  constructor (config: IDefinitionConfig) {
+  constructor(config: IDefinitionConfig) {
     this.config = clone(config);
   }
 
-  public parse () {
-    const {
-      title = '',
-      description = '',
-      version = uuid.v4(),
-      servers = [],
-      models,
-      security = [],
-    } = this.config;
+  public parse() {
+    const { title = '', description = '', version = uuid.v4(), servers = [], models, security = [] } = this.config;
 
     merge(this.definition, {
       openapi: this.version,
@@ -44,7 +48,10 @@ export class DefinitionGenerator {
         schemas: {},
         securitySchemes: security.reduce((result, s) => {
           const { authorizerName, name, ...rest } = s;
-          result[name] = rest;
+          result[name] = {
+            name,
+            ...rest,
+          };
           return result;
         }, {}),
       },
@@ -52,49 +59,40 @@ export class DefinitionGenerator {
 
     if (isIterable(models)) {
       for (const model of models) {
-        if (!model.schema) {
+        if (!model.schema && !model.tsSchema) {
           continue;
         }
-
-        this.definition.components.schemas[model.name] = this.cleanSchema(
-          dereference(model.schema),
-        );
+        if (model.tsSchema) {
+          const program = TJS.getProgramFromFiles([resolve(model.tsSchema.filePath)], {});
+          model.schema = TJS.generateSchema(program, model.tsSchema.typeName);
+          delete model.tsSchema;
+        }
+        this.definition.components.schemas[model.name] = this.cleanSchema(dereference(model.schema));
       }
     }
 
     return this;
   }
 
-  public validate (): { valid: boolean, context: string[], warnings: any[], error?: any[] } {
-    const payload: any = {};
-
-    try {
-      openApiValidatorSync(this.definition, payload);
-    } catch (error) {
-      payload.error = error.message;
-    }
-
-    return payload;
-  }
-
   /**
    * Add Paths to OpenAPI Configuration from Serverless function documentation
    * @param config Add
    */
-  public readFunctions (config: IServerlessFunctionConfig[]): void {
+  public readFunctions(config: IServerlessFunctionConfig[]): void {
     // loop through function configurations
     for (const funcConfig of config) {
       // loop through http events
       for (const httpEvent of this.getHttpEvents(funcConfig.events)) {
-        const httpEventConfig = httpEvent.http;
+        const httpEventConfig = httpEvent.http ?? httpEvent.httpApi;
 
         if (httpEventConfig.documentation) {
           // Build OpenAPI path configuration structure for each method
+          const path = httpEventConfig.path.startsWith('/') ? httpEventConfig.path : `/${httpEventConfig.path}`;
           const pathConfig = {
-            [`/${httpEventConfig.path}`]: {
+            [path]: {
               [httpEventConfig.method.toLowerCase()]: this.getOperationFromConfig(
-                funcConfig._functionName,
-                httpEventConfig,
+                httpEventConfig.documentation.operationId ?? funcConfig._functionName,
+                httpEventConfig
               ),
             },
           };
@@ -110,7 +108,7 @@ export class DefinitionGenerator {
    * Cleans schema objects to make them OpenAPI compatible
    * @param schema JSON Schema Object
    */
-  private cleanSchema (schema) {
+  private cleanSchema(schema) {
     // Clone the schema for manipulation
     const cleanedSchema = clone(schema);
 
@@ -128,9 +126,9 @@ export class DefinitionGenerator {
    *
    * @link https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/3.0.0.md#operationObject
    * @param funcName
-   * @param documentationConfig
+   * @param config
    */
-  private getOperationFromConfig (funcName: string, config): IOperation {
+  private getOperationFromConfig(funcName: string, config: OperationConfig): IOperation {
     const documentationConfig = config.documentation;
     const operationObj: IOperation = {
       operationId: funcName,
@@ -161,9 +159,20 @@ export class DefinitionGenerator {
     operationObj.responses = this.getResponsesFromConfig(documentationConfig);
 
     if (config.authorizer && this.config.security) {
-      const security = this.config.security.find((s) => s.authorizerName === config.authorizer.name);
+      const authorizerName =
+        typeof config.authorizer === 'string'
+          ? config.authorizer
+          : (config.authorizer as NamedHttpApiEventAuthorizer)?.name;
+      const security = this.config.security.find((s) => s.authorizerName === authorizerName);
       if (security) {
         operationObj.security = [{ [security.name]: [] }];
+      }
+    }
+
+    if (documentationConfig.security) {
+      const securities = this.config.security.filter((s) => documentationConfig.security.includes(s.name));
+      if (securities?.length > 0) {
+        operationObj.security = securities.map((security) => ({ [security.name]: [] }));
       }
     }
 
@@ -174,12 +183,12 @@ export class DefinitionGenerator {
    * Derives Path, Query and Request header parameters from Serverless documentation
    * @param documentationConfig
    */
-  private getParametersFromConfig (documentationConfig): IParameterConfig[] {
+  private getParametersFromConfig(documentationConfig: IEventDocumentation): IParameterConfig[] {
     const parameters: IParameterConfig[] = [];
 
     // Build up parameters from configuration for each parameter type
     for (const type of ['path', 'query', 'header', 'cookie']) {
-      let paramBlock;
+      let paramBlock: typeof documentationConfig['queryParams'];
       if (type === 'path' && documentationConfig.pathParams) {
         paramBlock = documentationConfig.pathParams;
       } else if (type === 'query' && documentationConfig.queryParams) {
@@ -205,7 +214,7 @@ export class DefinitionGenerator {
         if (type === 'path') {
           parameterConfig.required = true;
         } else if (type === 'query') {
-          parameterConfig.allowEmptyValue = parameter.allowEmptyValue || false;  // OpenAPI default is false
+          parameterConfig.allowEmptyValue = parameter.allowEmptyValue || false; // OpenAPI default is false
 
           if ('allowReserved' in parameter) {
             parameterConfig.allowReserved = parameter.allowReserved || false;
@@ -219,18 +228,14 @@ export class DefinitionGenerator {
         if ('style' in parameter) {
           parameterConfig.style = parameter.style;
 
-          parameterConfig.explode = parameter.explode
-            ? parameter.explode
-            : parameter.style === 'form';
+          parameterConfig.explode = parameter.explode ? parameter.explode : parameter.style === 'form';
         }
 
         if (parameter.schema) {
           parameterConfig.schema = this.cleanSchema(parameter.schema);
         }
 
-        if (parameter.example) {
-          parameterConfig.example = parameter.example;
-        } else if (parameter.examples && Array.isArray(parameter.examples)) {
+        if (parameter.examples && Array.isArray(parameter.examples)) {
           parameterConfig.examples = parameter.examples;
         }
 
@@ -249,7 +254,7 @@ export class DefinitionGenerator {
    * Derives request body schemas from event documentation configuration
    * @param documentationConfig
    */
-  private getRequestBodiesFromConfig (documentationConfig) {
+  private getRequestBodiesFromConfig(documentationConfig: IEventDocumentation) {
     const requestBodies = {};
 
     if (!documentationConfig.requestModels) {
@@ -261,9 +266,9 @@ export class DefinitionGenerator {
       // For each request model type (Sorted by "Content-Type")
       for (const requestModelType of Object.keys(documentationConfig.requestModels)) {
         // get schema reference information
-        const requestModel = this.config.models.filter(
-          (model) => model.name === documentationConfig.requestModels[requestModelType],
-        ).pop();
+        const requestModel = this.config.models
+          .filter((model) => model.name === documentationConfig.requestModels[requestModelType])
+          .pop();
 
         if (requestModel) {
           const reqModelConfig = {
@@ -274,7 +279,7 @@ export class DefinitionGenerator {
 
           this.attachExamples(requestModel, reqModelConfig);
 
-          const reqBodyConfig: { content: object, description?: string } = {
+          const reqBodyConfig: { content: object; description?: string } = {
             content: {
               [requestModelType]: reqModelConfig,
             },
@@ -292,11 +297,9 @@ export class DefinitionGenerator {
     return requestBodies;
   }
 
-  private attachExamples (target, config) {
+  private attachExamples(target: IModel, config) {
     if (target.examples) {
       merge(config, { examples: clone(target.examples) });
-    } else if (target.example) {
-      merge(config, { example: clone(target.example) });
     }
   }
 
@@ -304,16 +307,15 @@ export class DefinitionGenerator {
    * Gets response bodies from documentation config
    * @param documentationConfig
    */
-  private getResponsesFromConfig (documentationConfig) {
+  private getResponsesFromConfig(documentationConfig: IEventDocumentation) {
     const responses = {};
     if (documentationConfig.methodResponses) {
       for (const response of documentationConfig.methodResponses) {
-        const methodResponseConfig: { description: any, content: object, headers?: object } = {
-          description: (
-            (response.responseBody && 'description' in response.responseBody)
+        const methodResponseConfig: { description: any; content: object; headers?: object } = {
+          description:
+            response.responseBody && 'description' in response.responseBody
               ? response.responseBody.description
-              : `Status ${response.statusCode} Response`
-          ),
+              : `Status ${response.statusCode} Response`,
           content: this.getResponseContent(response.responseModels),
         };
 
@@ -338,13 +340,11 @@ export class DefinitionGenerator {
     return responses;
   }
 
-  private getResponseContent (response) {
+  private getResponseContent(response: Record<string, string>) {
     const content = {};
 
     for (const responseKey of Object.keys(response)) {
-      const responseModel = this.config.models.find((model) =>
-        model.name === response[responseKey],
-      );
+      const responseModel = this.config.models.find((model) => model.name === response[responseKey]);
 
       if (responseModel) {
         const resModelConfig = {
@@ -355,14 +355,14 @@ export class DefinitionGenerator {
 
         this.attachExamples(responseModel, resModelConfig);
 
-        merge(content, { [responseKey] : resModelConfig });
+        merge(content, { [responseKey]: resModelConfig });
       }
     }
 
     return content;
   }
 
-  private getHttpEvents (funcConfig) {
-    return funcConfig.filter((event) => event.http ? true : false);
+  private getHttpEvents(funcConfig: IServerlessFunctionEvent[]) {
+    return funcConfig.filter((event) => (event.http || event.httpApi ? true : false));
   }
 }

@@ -1,17 +1,15 @@
 service: serverless-openapi-doc-demo
-frameworkVersion: ">=1.1.0 < 2.0.0"
+
+frameworkVersion: '2'
 provider:
   name: aws
-  runtime: nodejs6.10
-
-plugins:
-  - serverless-openapi-documentation
+  runtime: nodejs14.10
 
 functions:
   createUser:
     handler: handler.create
     events:
-      - http:
+      - httpApi:
           path: create
           method: post
           authorizer:
@@ -28,7 +26,7 @@ functions:
                 description: The username for a user to create
                 schema:
                   type: string
-                  pattern: "^[-a-z0-9_]+$"
+                  pattern: '^[-a-z0-9_]+$'
             queryParams:
               - name: membershipType
                 description: The user's Membership Type
@@ -56,27 +54,34 @@ functions:
 
 custom:
   documentation:
-    title: "a title"
-    version: "1.2"
-    description: "a description"
+    title: 'a title'
+    version: '1.2'
+    description: 'a description'
     servers:
-      - url: "https://example.com"
-        description: "Dev server"
+      - url: 'https://example.com'
+        description: 'Dev server'
     security:
       - name: auth
         authorizerName: customAuth
         type: http
         scheme: bearer
     models:
+      - name: GetResponse
+        description: Response
+        contentType: application/json
+        tsSchema:
+          filePath: test/project/models/GetResponse.ts
+          typeName: GetResponse
+
       - name: ErrorResponse
         description: This is an error
         contentType: application/json
-        schema: ${file(models/ErrorResponse.json)}
+        schema: ${file(test/project/models/ErrorResponse.json)}
 
       - name: PutDocumentResponse
         description: PUT Document response model (external reference example)
         contentType: application/json
-        schema: ${file(models/PutDocumentResponse.json)}
+        schema: ${file(test/project/models/PutDocumentResponse.json)}
 
       - name: PutDocumentRequest
         description: PUT Document request model (inline example)

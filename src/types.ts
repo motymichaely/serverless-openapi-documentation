@@ -1,11 +1,15 @@
+import type { Event, Http, HttpApiEvent } from 'serverless/aws';
 
-export interface IModels {
+export interface IModel {
   name: string;
-  description: string;
+  description?: string;
   contentType: string;
   schema: object | any[];
+  tsSchema?: {
+    filePath: string;
+    typeName: string;
+  };
   examples: any[];
-  example: object;
 }
 
 export interface IDefinitionConfig {
@@ -13,15 +17,16 @@ export interface IDefinitionConfig {
   description: string;
   version?: string;
   servers?: IServer[];
-  models: IModels[];
+  models: IModel[];
   security?: ISecurity[];
 }
 
 export interface ISecurity {
   name: string;
-  authorizerName: string;
-  type: string;
-  scheme: string;
+  type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect';
+  scheme?: string;
+  in?: 'query' | 'header' | 'cookie';
+  authorizerName?: string;
 }
 
 export interface IDefinitionType {
@@ -32,10 +37,62 @@ export interface IDefinitionType {
 
 export interface IServerlessFunctionConfig {
   _functionName: string;
-  handler: string;
+  handler?: string;
   description?: string;
   environment?: object;
-  events?: any[];
+  events?: IServerlessFunctionEvent[];
+}
+
+export interface Param {
+  allowEmptyValue?: boolean;
+  allowReserved?: boolean;
+  name: string;
+  in: 'path' | 'query' | 'header' | 'cookie';
+  description?: string;
+  required?: boolean;
+  style?: 'form' | 'simple';
+  explode?: boolean;
+  deprecated?: boolean;
+  schema?: object;
+  examples?: any[];
+  content?: any;
+}
+export interface IEventDocumentation {
+  summary: string;
+  operationId?: string;
+  security?: string[];
+  description?: string;
+  tags?: string[];
+  deprecated?: boolean;
+  requestModels?: any;
+  queryParams?: Param[];
+  pathParams?: Param[];
+  requestHeaders?: Param[];
+  cookieParams?: Param[];
+  requestBody?: {
+    description?: string;
+  };
+  methodResponses: {
+    statusCode: number;
+    responseBody?: {
+      description?: string;
+    };
+    responseHeaders: {
+      name: string;
+      description: string;
+      schema: object;
+    }[];
+    responseModels: {
+      [key: string]: string;
+    };
+  }[];
+}
+
+export type OperationConfig = (HttpApiEvent | Http) & { documentation?: IEventDocumentation };
+
+export interface IServerlessFunctionEvent extends Event {
+  httpApi?: HttpApiEvent & { documentation?: IEventDocumentation };
+  http?: Http & { documentation?: IEventDocumentation };
 }
 
 // TODO: We could use another TS based OpenAPI project to get type information

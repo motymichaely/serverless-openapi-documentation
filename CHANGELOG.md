@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Migration to Serverless v2
+- HTTP API v2 support
+- Update dependencies
+- Remove temporary validation
+- Add support for defining schema via Typescript types
+- Various changes and improvements
+
 ## [0.4.0][] - 2018-04-04
 
 - Various changes
@@ -32,7 +39,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 Last release prior to CHANGELOG being added.
 
 
-[Unreleased]: https://github.com/temando/serverless-openapi-documentation/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/temando/serverless-openapi-documentation/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.4.0...v0.4.0
 [0.4.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/temando/serverless-openapi-documentation/tree/v0.3.0

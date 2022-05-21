@@ -148,6 +148,27 @@ Object {
         "title": "JSON API Schema",
         "type": "object",
       },
+      "GetResponse": Object {
+        "properties": Object {
+          "body": Object {
+            "additionalProperties": true,
+            "properties": Object {},
+            "type": "object",
+          },
+          "headers": Object {
+            "properties": Object {
+              "Content-Type": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "statusCode": Object {
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
       "PutDocumentRequest": Object {
         "properties": Object {
           "SomeObject": Object {
@@ -167,6 +188,7 @@ Object {
     },
     "securitySchemes": Object {
       "auth": Object {
+        "name": "auth",
         "scheme": "bearer",
         "type": "http",
       },

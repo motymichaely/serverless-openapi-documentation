@@ -8,6 +8,8 @@
     "declaration": true,
     "noUnusedLocals": true,
     "downlevelIteration": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "lib": [
       "es6",
       "es7",
