@@ -1,6 +1,6 @@
 {
   "name": "@apalchys/serverless-openapi-documentation",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Serverless 2.0 plugin to generate OpenAPI V3 documentation from serverless configuration",
   "main": "dist/index.js",
   "repository": {

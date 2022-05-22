@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.1][] - 2022-05-22
+
 - Make `schema` optional when use `tsSchema`
 
 ## [0.5.0][] - 2022-05-22
@@ -43,7 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 Last release prior to CHANGELOG being added.
 
 
-[Unreleased]: https://github.com/temando/serverless-openapi-documentation/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/temando/serverless-openapi-documentation/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/temando/serverless-openapi-documentation/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.5.0...v0.5.0
 [0.5.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/temando/serverless-openapi-documentation/compare/v0.4.0...v0.4.0
