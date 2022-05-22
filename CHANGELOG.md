@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Make `responseHeaders` optional
+
 ## [0.5.1][] - 2022-05-22
 
 - Make `schema` optional when use `tsSchema`

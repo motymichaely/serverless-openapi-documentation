@@ -77,7 +77,7 @@ export interface IEventDocumentation {
     responseBody?: {
       description?: string;
     };
-    responseHeaders: {
+    responseHeaders?: {
       name: string;
       description: string;
       schema: object;
