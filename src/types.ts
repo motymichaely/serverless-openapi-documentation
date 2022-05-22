@@ -4,12 +4,12 @@ export interface IModel {
   name: string;
   description?: string;
   contentType: string;
-  schema: object | any[];
+  schema?: object | any[];
   tsSchema?: {
     filePath: string;
     typeName: string;
   };
-  examples: any[];
+  examples?: any[];
 }
 
 export interface IDefinitionConfig {
