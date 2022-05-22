@@ -117,7 +117,7 @@ export interface IOperation {
 
 export interface IServer {
   url: string;
-  descripition: string;
+  description: string;
 }
 
 // @see https://github.com/OAI/OpenAPI-Specification/blob/3.0.0/versions/3.0.0.md#parameterObject

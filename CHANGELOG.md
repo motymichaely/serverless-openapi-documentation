@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- Fix typo
+
 ## [0.5.2][] - 2022-05-22
 
 - Make `responseHeaders` optional
