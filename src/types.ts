@@ -1,5 +1,6 @@
 import type { Event, Http, HttpApiEvent } from 'serverless/aws';
 
+
 export interface IModel {
   name: string;
   description?: string;
@@ -16,9 +17,23 @@ export interface IDefinitionConfig {
   title: string;
   description: string;
   version?: string;
+  termsOfService?: string,
+  contact?: IContact,
+  license?: ILicense,
   servers?: IServer[];
   models: IModel[];
   security?: ISecurity[];
+}
+
+export interface IContact {
+  name?: string;
+  url?: string;
+  email?: string;
+}
+
+export interface ILicense {
+  name: string;
+  url?: string;
 }
 
 export interface ISecurity {

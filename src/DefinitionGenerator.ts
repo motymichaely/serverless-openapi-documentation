@@ -37,11 +37,11 @@ export class DefinitionGenerator {
   }
 
   public parse() {
-    const { title = '', description = '', version = uuid.v4(), servers = [], models, security = [] } = this.config;
+    const { title = '', description = '', version = uuid.v4(), termsOfService = '', contact = null, license = null, servers = [], models, security = [] } = this.config;
 
     merge(this.definition, {
       openapi: this.version,
-      info: { title, description, version },
+      info: Object.assign({ title, description, version, termsOfService}, contact && { contact }, license && { license }),
       servers,
       paths: {},
       components: {

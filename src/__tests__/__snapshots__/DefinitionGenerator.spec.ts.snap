@@ -195,7 +195,13 @@ Object {
     },
   },
   "info": Object {
+    "contact": Object {
+      "email": "test@test.com",
+      "name": "Test team",
+      "url": "http://test.com",
+    },
     "description": "a description",
+    "termsOfService": "",
     "title": "a title",
     "version": "1.2",
   },

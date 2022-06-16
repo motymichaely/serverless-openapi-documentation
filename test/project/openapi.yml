@@ -165,6 +165,12 @@ info:
   title: ''
   description: ''
   version: 442d95b9-dcc5-4e6e-a354-a561b8904c08
+  license: null
+  contact:
+    email: test@test.com
+    name: Test team
+    url: http://test.com
+  termsOfService: ''
 paths:
   /create:
     post:

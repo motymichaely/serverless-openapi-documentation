@@ -11,7 +11,7 @@ endpoints:
         description: The username for a user to create
         schema:
           type: string
-          pattern: "^[-a-z0-9_]+$"
+          pattern: '^[-a-z0-9_]+$'
     queryParams:
       - name: membershipType
         description: The user's Membership Type
@@ -23,7 +23,7 @@ endpoints:
     cookieParams:
       - name: SessionId
         description: A Session ID variable
-        schema: 
+        schema:
           type: string
     methodResponses:
       - statusCode: 201
@@ -38,19 +38,38 @@ endpoints:
           application/json: ErrorResponse
 
 documentation:
-  title: "a title"
-  version: "1.2",
-  description: "a description"
+  title: 'a title'
+  version: '1.2'
+  description: 'a description'
+  contact:
+    email: "test@test.com"
+    name: "Test team"
+    url: "http://test.com"
+  servers:
+    - url: 'https://example.com'
+      description: 'Dev server'
+  security:
+    - name: auth
+      authorizerName: customAuth
+      type: http
+      scheme: bearer
   models:
+    - name: GetResponse
+      description: Response
+      contentType: application/json
+      tsSchema:
+        filePath: test/project/models/GetResponse.ts
+        typeName: GetResponse
+
     - name: ErrorResponse
       description: This is an error
       contentType: application/json
-      schema: ${file(models/ErrorResponse.json)}
+      schema: ${file(test/project/models/ErrorResponse.json)}
 
     - name: PutDocumentResponse
       description: PUT Document response model (external reference example)
       contentType: application/json
-      schema: ${file(models/PutDocumentResponse.json)}
+      schema: ${file(test/project/models/PutDocumentResponse.json)}
 
     - name: PutDocumentRequest
       description: PUT Document request model (inline example)

@@ -2,6 +2,9 @@ openapi: 3.0.0-RC1
 description: ''
 version: 0.0.0
 title: ''
+license: null
+contact: null
+termsOfService: ''
 paths:
   /dock:
     get:
@@ -605,3 +608,9 @@ info:
   title: Storage V2 Service
   description: The Storage V2 service is Temando's storage platform
   version: 2.0.7
+  license: null
+  contact:
+    email: test@test.com
+    name: Test team
+    url: http://test.com
+  termsOfService: ''

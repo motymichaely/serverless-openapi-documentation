@@ -312,19 +312,19 @@ To add this plugin to your package.json:
 
 **Using npm:**
 ```bash
-npm install @apalchys/serverless-openapi-documentation --save-dev
+npm install @motymichaely/serverless-openapi-documentation --save-dev
 ```
 
 **Using Yarn:**
 ```bash
-yarn add @apalchys/serverless-openapi-documentation --dev
+yarn add @motymichaely/serverless-openapi-documentation --dev
 ```
 
 Next you need to add the plugin to the `plugins` section of your `serverless.yml` file.
 
 ```yml
 plugins:
-  - '@apalchys/serverless-openapi-documentation'
+  - '@motymichaely/serverless-openapi-documentation'
 ```
 
 You can confirm the plugin is correctly installed by running:
