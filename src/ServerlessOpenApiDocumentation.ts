@@ -160,8 +160,22 @@ export class ServerlessOpenApiDocumentation {
 
     const { definition } = generator;
 
-    // Output the OpenAPI document to the correct format
+    // Convert multiple 'type' entries to valid 'oneOf' entries, see 'Mixed Types' at
+    // https://swagger.io/docs/specification/data-models/data-types/
+    const convertTypeArrayToOneOf = (schema) => {
+      if (Array.isArray(schema.type)) {
+        schema.oneOf = schema.type.map((type) => ({ type }));
+        delete schema.type;
+      }
+      Object.keys(schema).forEach((key) => {
+        if (schema[key] && typeof schema[key] === 'object') {
+          convertTypeArrayToOneOf(schema[key]);
+        }
+      });
+    };
+    convertTypeArrayToOneOf(definition.components);
 
+    // Output the OpenAPI document to the correct format
     let output;
     switch (config.format.toLowerCase()) {
       case 'json':
